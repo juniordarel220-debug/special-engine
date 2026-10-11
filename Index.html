@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090d1b">
+<title>NOVA Games | Play Free</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090d1b;color:#fff;font-family:Arial,sans-serif}
+header{padding:22px 16px;background:#11182b;border-bottom:1px solid #273653}
+.logo{font-size:27px;font-weight:900;color:#72e8ff}
+.logo span{color:#b58aff}
+header p{color:#abb8d0;margin-bottom:0}
+main{max-width:850px;margin:auto;padding:20px 15px}
+.hero{padding:24px 18px;border-radius:18px;background:linear-gradient(135deg,#202b58,#39205c)}
+h1{font-size:30px;margin:0 0 10px}
+p{line-height:1.5;color:#c2cce0}
+button{border:0;border-radius:10px;padding:13px 18px;font-weight:bold;font-size:16px;cursor:pointer}
+.play{background:#70f0c0;color:#071b19}
+.card{background:#141d31;border:1px solid #293753;padding:17px;border-radius:15px;margin-top:18px}
+.game{display:none;text-align:center}
+canvas{width:100%;max-width:400px;background:#101a32;border-radius:12px;touch-action:manipulation}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.secondary{background:#293957;color:white}
+#score{color:#70f0c0;font-size:20px;font-weight:bold}
+footer{text-align:center;color:#8d9bb4;padding:25px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">NOVA <span>GAMES</span></div>
+  <p>Your next favourite game starts here.</p>
+</header>
+<main>
+  <section class="hero">
+    <h1>Play. Challenge. Win.</h1>
+    <p>Discover free games you can play directly on your phone. No download needed.</p>
+    <button class="play" onclick="openGame()">▶ PLAY NOW</button>
+  </section>
+  <section class="card">
+    <h2>🎮 Featured Game</h2>
+    <h3>Star Catcher</h3>
+    <p>Move your player and catch the falling stars. How many can you collect?</p>
+    <button class="play" onclick="openGame()">Play Star Catcher</button>
+  </section>
+  <section class="card game" id="game">
+    <h2>⭐ Star Catcher</h2>
+    <p>Tap the left or right side of the game to move.</p>
+    <p id="score">Score: 0</p>
+    <canvas id="board" width="360" height="420"></canvas>
+    <div class="controls">
+      <button class="secondary" onclick="move(-1)">⬅ LEFT</button>
+      <button class="secondary" onclick="move(1)">RIGHT ➡</button>
+      <button class="play" onclick="startGame()">Restart</button>
+    </div>
+    <p id="status">Catch the stars!</p>
+  </section>
+  <section class="card">
+    <h2>🚀 More games coming</h2>
+    <p>We're building a growing collection of free browser games. Come back for new challenges!</p>
+  </section>
+</main>
+<footer>© 2026 NOVA Games · Play fair · Have fun</footer>
+<script>
+const canvas=document.getElementById('board');
+const ctx=canvas.getContext('2d');
+let player,stars,score,running,frame,timer;
+function openGame(){
+ document.getElementById('game').style.display='block';
+ startGame();
+ document.getElementById('game').scrollIntoView({behavior:'smooth'});
+}
+function startGame(){
+ clearTimeout(timer);
+ player={x:180,y:380};
+ stars=[];
+ score=0;
+ frame=0;
+ running=true;
+ document.getElementById('score').textContent='Score: 0';
+ document.getElementById('status').textContent='Catch the stars!';
+ draw();
+}
+function move(d){
+ if(player)player.x=Math.max(18,Math.min(342,player.x+d*28));
+ draw();
+}
+canvas.addEventListener('pointerdown',e=>{
+ const r=canvas.getBoundingClientRect();
+ const x=(e.clientX-r.left)*canvas.width/r.width;
+ if(x<canvas.width/2)move(-1);else move(1);
+});
+function draw(){
+ if(!running)return;
+ frame++;
+ if(frame%35===0)stars.push({x:12+Math.random()*336,y:0});
+ ctx.clearRect(0,0,360,420);
+ ctx.fillStyle='#101a32';ctx.fillRect(0,0,360,420);
+ for(let i=0;i<22;i++){
+  ctx.fillStyle='#354567';
+  ctx.fillRect((i*61)%360,(i*79+frame%420)%420,2,2);
+ }
+ ctx.font='23px Arial';ctx.textAlign='center';
+ for(let i=stars.length-1;i>=0;i--){
+  const s=stars[i];s.y+=3;
+  ctx.fillText('⭐',s.x,s.y);
+  if(Math.abs(s.x-player.x)<24&&Math.abs(s.y-player.y)<25){
+   stars.splice(i,1);score++;
+   document.getElementById('score').textContent='Score: '+score;
+  }else if(s.y>430)stars.splice(i,1);
+ }
+ ctx.font='30px Arial';ctx.fillText('🚀',player.x,player.y);
+ if(frame>0&&frame%1200===0){
+  running=false;
+  document.getElementById('status').textContent='Game over! Final score: '+score;
+  return;
+ }
+ timer=requestAnimationFrame(draw);
+}
+</script>
+</body>
+</html>
